@@ -154,6 +154,20 @@
   .istep .body h4{font-size:15px;font-weight:600;margin-bottom:9px}
   .istep .body h4 .muted{color:var(--text-dim);font-weight:400;font-size:13.5px}
 
+  /* fast-path: one-paste setup prompt */
+  .fastpath{max-width:740px;margin:0 auto 0;background:linear-gradient(180deg,var(--codex-glow),transparent);border:1px solid var(--border-2);border-radius:16px;padding:22px 22px 22px}
+  .fp-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:15px}
+  .fp-badge{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--codex);background:var(--codex-glow);border:1px solid var(--border-2);border-radius:7px;padding:5px 11px}
+  .fp-sub{font-size:14px;color:var(--text-mid)}
+  .prompt-box{background:#0c0d14;border:1px solid var(--border);border-radius:11px;overflow:hidden;min-width:0}
+  .prompt-box .pb-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px 9px 15px;border-bottom:1px solid var(--border);background:#0a0b11}
+  .prompt-box .pb-ttl{font-family:var(--mono);font-size:11.5px;color:var(--text-dim)}
+  .prompt-box .copy{font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--text);background:var(--card-2);border:1px solid var(--border-2);border-radius:7px;padding:6px 13px;cursor:pointer;transition:all .2s;flex:0 0 auto}
+  .prompt-box .copy:hover{border-color:var(--codex);color:var(--codex)}
+  .prompt-box .copy.ok{color:var(--codex);border-color:var(--codex)}
+  .prompt-box pre{font-family:var(--mono);font-size:12.7px;line-height:1.7;color:var(--text);padding:17px 18px;white-space:pre-wrap;word-break:break-word;margin:0}
+  .fp-or{text-align:center;color:var(--text-dim);font-family:var(--mono);font-size:11.5px;letter-spacing:2px;text-transform:uppercase;margin:24px auto 24px;position:relative}
+
   /* ===== customize grid ===== */
   .cust{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:960px;margin:0 auto}
   .cust .full{grid-column:1/-1}
@@ -318,6 +332,30 @@
       <h2>Running in about a minute</h2>
       <p>You need the Codex CLI installed and logged in. The plugin is two commands on top.</p>
     </div>
+
+    <div class="fastpath reveal">
+      <div class="fp-head">
+        <span class="fp-badge">Fastest way</span>
+        <span class="fp-sub">paste this into Claude Code and it sets itself up</span>
+      </div>
+      <div class="prompt-box">
+        <div class="pb-top"><span class="pb-ttl">paste into Claude Code</span><button class="copy" type="button" data-copy="#setupPrompt">Copy</button></div>
+<pre id="setupPrompt">Set up the "codex-coworker" Claude Code plugin for me, end to end:
+
+1. Check whether the Codex CLI is installed (run: codex --version). If it is missing, install it with: npm install -g @openai/codex  (on macOS you can also use: brew install --cask codex).
+2. Run: codex login status. If I am not logged in, stop and tell me to run "codex login" myself (it opens a browser), then continue once I confirm.
+3. Add the marketplace and install the plugin:
+   claude plugin marketplace add amadejdemsar-create/codex-coworker
+   claude plugin install codex-coworker@codex-coworker
+4. Run: codex-doctor  and show me the output so I can confirm everything is green.
+5. Add a permission allowlist for Bash(codex-consult:*), Bash(codex-doctor:*) and Bash(codex-image:*) to my Claude Code settings, and append a short note to my CLAUDE.md telling you to use /codex-coworker:review before any high-stakes decision.
+
+Tell me what you did at each step, and stop to ask me if anything needs my input.</pre>
+      </div>
+    </div>
+
+    <div class="fp-or">or, step by step</div>
+
     <div class="install">
       <div class="istep reveal">
         <div class="num">1</div>
@@ -450,5 +488,17 @@ co-equal voter; I stay the decision owner.</pre></div>
   <div class="wrap">codex-coworker · MIT · <a href="https://github.com/amadejdemsar-create/codex-coworker">github.com/amadejdemsar-create/codex-coworker</a></div>
 </footer>
 
+<script>
+  document.querySelectorAll('.copy').forEach(function(b){
+    b.addEventListener('click',function(){
+      var t=document.querySelector(b.getAttribute('data-copy'));
+      if(!t)return;
+      navigator.clipboard.writeText(t.innerText).then(function(){
+        var o=b.textContent;b.textContent='Copied';b.classList.add('ok');
+        setTimeout(function(){b.textContent=o;b.classList.remove('ok');},1600);
+      }).catch(function(){});
+    });
+  });
+</script>
 </body>
 </html>
