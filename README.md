@@ -2,6 +2,8 @@
 
 A Claude Code plugin that puts **OpenAI Codex** to work *inside* Claude Code, as a coworker rather than a black box.
 
+**▶ [Live overview](https://amadejdemsar-create.github.io/codex-coworker/)** — what it is, what you can do with it, and how to customize it.
+
 - **`/codex-coworker:review`** runs Codex (gpt-5.5) as a sharp, adversarial **second opinion**. Claude drafts a plan, diff, or piece of writing; Codex red-teams it; Claude reconciles the critique in the open and reports what changed. Built on the idea that two strong models with different blind spots beat one, and that their *disagreement* is the signal worth mining, not their agreement.
 - **`/codex-coworker:image`** renders images through Codex's built-in image tool and verifies the PNG actually landed.
 
