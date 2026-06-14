@@ -1,0 +1,17 @@
+{
+  "name": "codex-coworker",
+  "owner": {
+    "name": "Amadej Demsar",
+    "url": "https://github.com/amadejdemsar-create"
+  },
+  "metadata": {
+    "description": "OpenAI Codex as a coworker inside Claude Code: a second-opinion critic and an image generator."
+  },
+  "plugins": [
+    {
+      "name": "codex-coworker",
+      "source": "./plugins/codex",
+      "description": "OpenAI Codex (gpt-5.5) as a second-opinion critic + image generator for Claude Code."
+    }
+  ]
+}

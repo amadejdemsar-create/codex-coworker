@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# codex-image - generate an image with OpenAI Codex's built-in image tool via `codex exec`.
+# Requires ChatGPT-account auth (`codex login`); image generation is NOT available with API-key auth.
+#
+# Usage:
+#   codex-image "<image prompt>" <output.png> [WIDTHxHEIGHT]
+#
+# Example:
+#   codex-image "a minimalist fox logo, flat vector, navy on cream" ./logo.png 1024x1024
+#
+# Environment: CODEX_BIN overrides the codex binary path.
+# Exit codes: 0 ok (file verified), 1 failure, 2 bad usage.
+set -euo pipefail
+
+PROMPT="${1:-}"
+OUTPUT="${2:-}"
+SIZE="${3:-1024x1024}"
+
+if [ -z "$PROMPT" ] || [ -z "$OUTPUT" ]; then
+  echo "usage: codex-image \"<image prompt>\" <output.png> [WIDTHxHEIGHT]" >&2
+  exit 2
+fi
+case "$SIZE" in *x*) ;; *) echo "codex-image: size must look like 1024x1024" >&2; exit 2;; esac
+
+detect_codex() {
+  if [ -n "${CODEX_BIN:-}" ]; then
+    if [ -x "$CODEX_BIN" ]; then printf '%s' "$CODEX_BIN"; return 0; fi
+    echo "codex-image: \$CODEX_BIN set but not executable: $CODEX_BIN" >&2; return 1
+  fi
+  if command -v codex >/dev/null 2>&1; then command -v codex; return 0; fi
+  if [ -x "/Applications/Codex.app/Contents/Resources/codex" ]; then
+    printf '%s' "/Applications/Codex.app/Contents/Resources/codex"; return 0
+  fi
+  return 1
+}
+
+CODEX="$(detect_codex)" || {
+  echo "codex-image: Codex CLI not found. Install it and run 'codex login' (ChatGPT account)." >&2
+  exit 1
+}
+
+# Auth must be a ChatGPT account for the built-in image tool to exist.
+STATUS="$("$CODEX" login status 2>&1 | head -n3)"
+if [ -z "$STATUS" ]; then
+  echo "codex-image: not logged in. Run 'codex login' with a ChatGPT account (image gen needs it)." >&2
+  exit 1
+fi
+if printf '%s' "$STATUS" | grep -qi "api key"; then
+  echo "codex-image: authenticated with an API key. Built-in image generation requires ChatGPT-account auth." >&2
+  echo "  Run 'codex logout' then 'codex login' and choose 'Sign in with ChatGPT'." >&2
+  exit 1
+fi
+
+# Normalise the output path to absolute and ensure the parent dir exists.
+case "$OUTPUT" in
+  /*) ABS="$OUTPUT" ;;
+  *)  ABS="$(pwd -P)/$OUTPUT" ;;
+esac
+PARENT="$(dirname "$ABS")"
+mkdir -p "$PARENT"
+
+# Run the agent with write access to the parent dir only.
+INSTR="Generate an image with your image generation tool and save it to the absolute path ${ABS} as a ${SIZE} PNG. Do not write any other files. Image prompt: ${PROMPT}"
+
+ERR="$(mktemp "${TMPDIR:-/tmp}/codex-image-err.XXXXXX")"
+trap 'rm -f "$ERR" 2>/dev/null || true' EXIT
+
+if ! "$CODEX" exec -s workspace-write --skip-git-repo-check -C "$PARENT" "$INSTR" >/dev/null 2>"$ERR"; then
+  echo "codex-image: codex exec failed." >&2
+  [ -s "$ERR" ] && { echo "--- codex stderr (tail) ---" >&2; tail -n 40 "$ERR" >&2; }
+  exit 1
+fi
+
+# Verify a real PNG landed at the path (magic bytes 89 50 4E 47).
+if [ ! -f "$ABS" ]; then
+  echo "codex-image: no file was created at $ABS (the model may not have produced an image)." >&2
+  exit 1
+fi
+MAGIC="$(head -c 4 "$ABS" | od -An -tx1 2>/dev/null | tr -d ' \n')"
+if [ "$MAGIC" != "89504e47" ]; then
+  echo "codex-image: file at $ABS is not a valid PNG (magic=$MAGIC)." >&2
+  exit 1
+fi
+
+BYTES="$(wc -c < "$ABS" | tr -d ' ')"
+echo "codex-image: saved $ABS (${BYTES} bytes, $SIZE PNG)"

@@ -1,0 +1,93 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "verdict",
+    "summary",
+    "agreements",
+    "disagreements",
+    "risks",
+    "missing",
+    "suggested_changes",
+    "open_questions",
+    "confidence"
+  ],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["sound", "sound_with_changes", "needs_rework", "reject"],
+      "description": "Overall judgement of the reviewed work."
+    },
+    "summary": {
+      "type": "string",
+      "description": "One or two sentences: the bottom line, why."
+    },
+    "agreements": {
+      "type": "array",
+      "description": "Parts that genuinely hold up. Terse. Max 5.",
+      "maxItems": 5,
+      "items": { "type": "string" }
+    },
+    "disagreements": {
+      "type": "array",
+      "description": "Specific points the reviewer disputes. Max 5, most important first.",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["point", "why", "severity", "suggested_fix"],
+        "properties": {
+          "point": { "type": "string", "description": "The claim or choice being disputed." },
+          "why": { "type": "string", "description": "Concrete reason it is wrong, weak, or risky." },
+          "severity": { "type": "string", "enum": ["low", "medium", "high"] },
+          "suggested_fix": { "type": "string", "description": "Actionable correction." }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "description": "Failure modes or downstream dangers the work does not address. Max 5.",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["risk", "mitigation"],
+        "properties": {
+          "risk": { "type": "string" },
+          "mitigation": { "type": "string" }
+        }
+      }
+    },
+    "missing": {
+      "type": "array",
+      "description": "Things the work omits that it should cover. Max 5.",
+      "maxItems": 5,
+      "items": { "type": "string" }
+    },
+    "suggested_changes": {
+      "type": "array",
+      "description": "Concrete edits, prioritised. Max 5.",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["change", "priority"],
+        "properties": {
+          "change": { "type": "string" },
+          "priority": { "type": "string", "enum": ["must", "should", "nice"] }
+        }
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "description": "What the reviewer needed but did not have, instead of guessing. Max 5.",
+      "maxItems": 5,
+      "items": { "type": "string" }
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["low", "medium", "high"],
+      "description": "Reviewer confidence in its own critique given the information provided."
+    }
+  }
+}

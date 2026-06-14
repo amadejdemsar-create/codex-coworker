@@ -1,0 +1,20 @@
+{
+  "name": "codex-coworker",
+  "description": "Use OpenAI Codex (gpt-5.5) as an adversarial second-opinion critic and as an image generator, from inside Claude Code. /codex-coworker:review red-teams your plans, diffs, and writing; /codex-coworker:image renders images.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Amadej Demsar",
+    "url": "https://github.com/amadejdemsar-create"
+  },
+  "homepage": "https://github.com/amadejdemsar-create/codex-coworker",
+  "repository": "https://github.com/amadejdemsar-create/codex-coworker",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "second-opinion",
+    "code-review",
+    "red-team",
+    "image-generation",
+    "openai"
+  ]
+}

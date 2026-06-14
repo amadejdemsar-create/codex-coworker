@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# codex-doctor - preflight for the `codex-coworker` Claude Code plugin.
+# Reports the codex binary, version, auth mode, image-gen capability, flag support,
+# model default, and timeout tooling. Run this after installing the plugin.
+# Exit 0 if the critic workflow is usable, 1 if codex is missing or too old.
+set -uo pipefail
+
+CODEX_MODEL_DEFAULT="${CODEX_MODEL:-gpt-5.5}"
+
+detect_codex() {
+  if [ -n "${CODEX_BIN:-}" ]; then
+    if [ -x "$CODEX_BIN" ]; then printf '%s' "$CODEX_BIN"; return 0; fi
+    return 1
+  fi
+  if command -v codex >/dev/null 2>&1; then command -v codex; return 0; fi
+  if [ -x "/Applications/Codex.app/Contents/Resources/codex" ]; then
+    printf '%s' "/Applications/Codex.app/Contents/Resources/codex"; return 0
+  fi
+  return 1
+}
+
+ok()   { printf '  \033[32mOK\033[0m   %s\n' "$1"; }
+warn() { printf '  \033[33mWARN\033[0m %s\n' "$1"; }
+bad()  { printf '  \033[31mFAIL\033[0m %s\n' "$1"; }
+
+echo "codex-doctor: Codex coworker plugin preflight"
+echo
+
+CODEX="$(detect_codex)" || {
+  bad "Codex CLI not found on PATH, \$CODEX_BIN, or the macOS app bundle."
+  echo
+  echo "  Install it, then re-run codex-doctor:"
+  echo "    npm install -g @openai/codex      # or"
+  echo "    brew install --cask codex         # or"
+  echo "    curl -fsSL https://chatgpt.com/codex/install.sh | sh"
+  echo "  Then authenticate:  codex login"
+  exit 1
+}
+ok "codex binary: $CODEX"
+
+VER="$("$CODEX" --version 2>/dev/null | head -n1)"
+[ -n "$VER" ] && ok "version: $VER" || warn "could not read codex --version"
+
+# --- auth mode (official command; note: codex writes this to stderr) ---
+STATUS="$("$CODEX" login status 2>&1 | head -n3)"
+if [ -z "$STATUS" ]; then
+  warn "not logged in. Run 'codex login' (ChatGPT account recommended)."
+  AUTH="unknown"
+elif printf '%s' "$STATUS" | grep -qiE "error|loading configuration"; then
+  warn "could not read auth: $STATUS"
+  warn "  (this codex binary may be older than your config.toml; set \$CODEX_BIN to a current binary, or update Codex)"
+  AUTH="unknown"
+elif printf '%s' "$STATUS" | grep -qi "chatgpt"; then
+  ok "auth: ChatGPT account ($STATUS)"
+  AUTH="chatgpt"
+elif printf '%s' "$STATUS" | grep -qi "api key"; then
+  warn "auth: API key. The critic works; built-in IMAGE GENERATION does NOT (needs ChatGPT auth)."
+  AUTH="apikey"
+else
+  ok "auth: $STATUS"
+  AUTH="other"
+fi
+
+# --- image-gen capability inference ---
+case "$AUTH" in
+  chatgpt) ok "image generation (/codex-coworker:image): available (ChatGPT auth)";;
+  apikey)  warn "image generation (/codex-coworker:image): NOT available with API-key auth. Use 'codex login' with a ChatGPT account.";;
+  *)       warn "image generation (/codex-coworker:image): unknown until you log in.";;
+esac
+
+# --- flag support (parse-probe, free). Boolean flags vs value-taking flags differ. ---
+probe()     { "$CODEX" exec "$1" --help >/dev/null 2>&1; }            # boolean flag
+probe_val() { "$CODEX" exec "$1" /dev/null --help >/dev/null 2>&1; }  # flag that takes a value
+SCHEMA_OK=1
+if probe_val --output-schema; then
+  ok "--output-schema supported (structured critique works)"
+else
+  SCHEMA_OK=0
+  bad "--output-schema NOT supported: your Codex is too old for /codex-coworker:review. Update it (npm i -g @openai/codex)."
+fi
+if probe --ignore-user-config; then
+  ok "--ignore-user-config supported (critic calls run isolated/lean)"
+else
+  warn "--ignore-user-config NOT supported: critic calls run with your full config (slower; your MCP servers may load; still works)."
+fi
+
+# --- model + timeout tooling ---
+ok "default model: $CODEX_MODEL_DEFAULT (override with \$CODEX_MODEL or --model)"
+if   command -v timeout  >/dev/null 2>&1; then ok "timeout tool: timeout"
+elif command -v gtimeout >/dev/null 2>&1; then ok "timeout tool: gtimeout"
+elif command -v perl     >/dev/null 2>&1; then ok "timeout tool: perl (alarm fallback)"
+else warn "no timeout tool (timeout/gtimeout/perl). Calls run without a hard timeout."; fi
+
+echo
+if [ "$SCHEMA_OK" = "1" ]; then
+  echo "Ready: /codex-coworker:review is usable. /codex-coworker:image needs ChatGPT auth."
+  exit 0
+else
+  echo "Update Codex (npm i -g @openai/codex) for the structured critic to work."
+  exit 1
+fi
