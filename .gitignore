@@ -3,3 +3,6 @@ research/
 .internal/
 .DS_Store
 *.log
+
+# QA screenshots, not shipped
+Assets/
