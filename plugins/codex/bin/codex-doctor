@@ -5,7 +5,8 @@
 # Exit 0 if the critic workflow is usable, 1 if codex is missing or too old.
 set -uo pipefail
 
-CODEX_MODEL_DEFAULT="${CODEX_MODEL:-gpt-5.5}"
+CODEX_MODEL_DEFAULT="${CODEX_MODEL:-the Codex CLI default}"
+CODEX_EFFORT_DEFAULT="${CODEX_EFFORT:-medium}"
 
 detect_codex() {
   if [ -n "${CODEX_BIN:-}" ]; then
@@ -86,6 +87,7 @@ fi
 
 # --- model + timeout tooling ---
 ok "default model: $CODEX_MODEL_DEFAULT (override with \$CODEX_MODEL or --model)"
+ok "default effort: $CODEX_EFFORT_DEFAULT (override with \$CODEX_EFFORT or --effort)"
 if   command -v timeout  >/dev/null 2>&1; then ok "timeout tool: timeout"
 elif command -v gtimeout >/dev/null 2>&1; then ok "timeout tool: gtimeout"
 elif command -v perl     >/dev/null 2>&1; then ok "timeout tool: perl (alarm fallback)"

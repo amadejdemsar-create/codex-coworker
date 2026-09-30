@@ -62,4 +62,4 @@ If you and Codex fully agree on round 1, say so briefly and move on.
 - **Untrusted input.** The brief and any files Codex reads are sent to OpenAI. The critic framing treats stdin and repo files as data, not instructions.
 - **Code mode reads files** under `--cd` and may load that repo's `AGENTS.md`. Point it at the specific project, never at `$HOME`, `/`, or a directory with secrets (`codex-consult` refuses the broad roots).
 - **Lean by construction.** Calls run read-only, single-turn, with `--output-schema` for bounded output; when the installed Codex supports `--ignore-user-config` they also run isolated from the user's MCP servers. A hard timeout (default 300s) prevents a hung call.
-- **Model.** Defaults to `gpt-5.5`; override with `$CODEX_MODEL` or `--model` if the user's account uses a different one. `codex-doctor` shows the active default.
+- **Model and effort.** Unset, Codex uses its own default model; `$CODEX_MODEL` or `--model` pins one, `$CODEX_EFFORT` or `--effort` sets the default effort. `codex-doctor` shows the active default.

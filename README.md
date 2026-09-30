@@ -4,7 +4,7 @@ A Claude Code plugin that puts **OpenAI Codex** to work *inside* Claude Code, as
 
 **▶ [Live overview](https://amadejdemsar-create.github.io/codex-coworker/)** — what it is, what you can do with it, and how to customize it.
 
-- **`/codex-coworker:review`** runs Codex (gpt-5.5) as a sharp, adversarial **second opinion**. Claude drafts a plan, diff, or piece of writing; Codex red-teams it; Claude reconciles the critique in the open and reports what changed. Built on the idea that two strong models with different blind spots beat one, and that their *disagreement* is the signal worth mining, not their agreement.
+- **`/codex-coworker:review`** runs Codex as a sharp, adversarial **second opinion**. Claude drafts a plan, diff, or piece of writing; Codex red-teams it; Claude reconciles the critique in the open and reports what changed. Built on the idea that two strong models with different blind spots beat one, and that their *disagreement* is the signal worth mining, not their agreement.
 - **`/codex-coworker:image`** renders images through Codex's built-in image tool and verifies the PNG actually landed.
 
 It is deliberately lean: critiques run read-only, single-turn, with a strict JSON output schema, so they stay cheap on a $20 ChatGPT Plus plan.
@@ -79,7 +79,7 @@ codex-image "a flat-vector navy fox on cream" ./logo.png 1024x1024
 codex-doctor
 ```
 
-`codex-consult` modes: `plan` | `code` | `writing` | `general`. Effort: `none|minimal|low|medium|high|xhigh` (default `medium`). Override the model with `--model` or `$CODEX_MODEL`; override the binary with `$CODEX_BIN`.
+`codex-consult` modes: `plan` | `code` | `writing` | `general`. Effort: `none|minimal|low|medium|high|xhigh` (default `medium`). Override the model with `--model` or `$CODEX_MODEL` (unset uses the Codex CLI default), the effort with `--effort` or `$CODEX_EFFORT`; override the binary with `$CODEX_BIN`.
 
 ## Permissions
 
@@ -114,7 +114,7 @@ Claude Code will prompt before running the plugin's commands the first time. To 
 - **"Codex CLI not found"** — install it (above) and run `codex login`, or set `$CODEX_BIN` to the binary path.
 - **Critic fails with a schema/flag error** — your Codex CLI is likely too old. `npm install -g @openai/codex` to update, then `codex-doctor`.
 - **Image generation says API-key auth** — run `codex logout` then `codex login` and choose "Sign in with ChatGPT".
-- **Rate limited** — Plus allows roughly 15 to 80 gpt-5.5 messages per rolling 5h; the critic defaults to a single round at medium effort to stay within it.
+- **Rate limited** — Plus allows roughly 15 to 80 Codex messages per rolling 5h; the critic defaults to a single round at medium effort to stay within it.
 
 ## How the critic works (design notes)
 

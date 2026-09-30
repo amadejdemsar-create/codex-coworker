@@ -229,10 +229,10 @@
   <div class="wrap">
     <div class="eyebrow reveal"><span class="dot"></span><span class="label" style="color:var(--text-mid)">Claude Code plugin</span></div>
     <h1 class="reveal" style="animation-delay:.05s">A second opinion,<br /><span class="grad">from a second model.</span></h1>
-    <p class="sub reveal" style="animation-delay:.12s">codex-coworker puts <b>OpenAI Codex (gpt-5.5)</b> inside Claude Code as a coworker, not a black box. Claude drafts a plan, diff, or piece of writing; Codex red-teams it; Claude reconciles the critique in the open and tells you what changed.</p>
+    <p class="sub reveal" style="animation-delay:.12s">codex-coworker puts <b>OpenAI Codex</b> inside Claude Code as a coworker, not a black box. Claude drafts a plan, diff, or piece of writing; Codex red-teams it; Claude reconciles the critique in the open and tells you what changed.</p>
     <div class="meta reveal" style="animation-delay:.18s">
       <span class="chip"><b>2</b> skills</span>
-      <span class="chip">model <b>gpt-5.5</b></span>
+      <span class="chip">model <b>your Codex default</b></span>
       <span class="chip">install in <b>2 commands</b></span>
       <span class="chip"><b>MIT</b></span>
     </div>
@@ -402,7 +402,7 @@ Tell me what you did at each step, and stop to ask me if anything needs my input
     <div class="cust">
       <div class="cu reveal">
         <h4><span class="k">$CODEX_MODEL</span></h4>
-        <p>The model Codex reviews with. Defaults to <code class="inline">gpt-5.5</code>. Override per call with <code class="inline">--model</code> if your account uses a different one.</p>
+        <p>The model Codex reviews with. Unset, Codex uses its own default model, which moves with each Codex release. Set it (or pass <code class="inline">--model</code>) to pin one.</p>
       </div>
       <div class="cu reveal" style="animation-delay:.04s">
         <h4><span class="k">$CODEX_BIN</span></h4>
@@ -468,7 +468,7 @@ co-equal voter; I stay the decision owner.</pre></div>
       <div class="sf reveal"><div class="ic">01</div><h4>Read-only</h4><p>Critiques run in a read-only sandbox. Codex inspects, it never writes to your files.</p></div>
       <div class="sf reveal" style="animation-delay:.05s"><div class="ic">02</div><h4>Bounded output</h4><p>A strict JSON schema caps the answer, and only that final answer enters Claude's context, never the raw reasoning.</p></div>
       <div class="sf reveal" style="animation-delay:.1s"><div class="ic">03</div><h4>One round by default</h4><p>It escalates to a second or third round only on a genuine, unresolved disagreement. Hard cap three.</p></div>
-      <div class="sf reveal" style="animation-delay:.15s"><div class="ic">04</div><h4>Rate-aware</h4><p>A $20 ChatGPT Plus plan allows roughly 15 to 80 gpt-5.5 messages per 5 hours. Defaults are picked to fit inside that.</p></div>
+      <div class="sf reveal" style="animation-delay:.15s"><div class="ic">04</div><h4>Rate-aware</h4><p>A $20 ChatGPT Plus plan allows roughly 15 to 80 Codex messages per 5 hours. Defaults are picked to fit inside that.</p></div>
     </div>
   </div>
 </section>

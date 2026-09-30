@@ -11,7 +11,7 @@
     {
       "name": "codex-coworker",
       "source": "./plugins/codex",
-      "description": "OpenAI Codex (gpt-5.5) as a second-opinion critic + image generator for Claude Code."
+      "description": "OpenAI Codex as a second-opinion critic + image generator for Claude Code."
     }
   ]
 }

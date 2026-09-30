@@ -13,8 +13,8 @@
 #
 # Options:
 #   --mode     plan | code | writing | general   (default plan)
-#   --effort   none|minimal|low|medium|high|xhigh (default medium)
-#   --model    model id                          (default $CODEX_MODEL or gpt-5.5)
+#   --effort   none|minimal|low|medium|high|xhigh (default $CODEX_EFFORT or medium)
+#   --model    model id                          (default $CODEX_MODEL, else the Codex CLI default)
 #   --cd       repo dir, REQUIRED for --mode code
 #   --schema   path to JSON Schema               (default bundled critique-schema.json)
 #   --extra    one-line extra focus instruction
@@ -22,7 +22,8 @@
 #
 # Environment:
 #   CODEX_BIN    override the codex binary path (else: PATH, then macOS app bundle)
-#   CODEX_MODEL  default model id (else gpt-5.5)
+#   CODEX_MODEL  default model id (else the Codex CLI's own default, which moves with each release)
+#   CODEX_EFFORT default reasoning effort (else medium)
 #
 # Security: the brief and any files read in code mode are sent to OpenAI. Never point
 # --cd at a directory holding secrets. The critic treats stdin and repo files as
@@ -36,8 +37,8 @@ PLUGIN_DIR="$(cd "$SELF_DIR/.." && pwd -P)"
 SCHEMA="$PLUGIN_DIR/reference/critique-schema.json"
 
 MODE="plan"
-EFFORT="medium"
-MODEL="${CODEX_MODEL:-gpt-5.5}"
+EFFORT="${CODEX_EFFORT:-medium}"
+MODEL="${CODEX_MODEL:-}"
 CD=""
 EXTRA=""
 TIMEOUT="300"
@@ -127,7 +128,9 @@ grep -q '[^[:space:]]' "$BRIEF_FILE" || { echo "codex-consult: empty brief on st
 # Parse-probe version-gated flags (free: arg-parse only, no API call). Include if accepted.
 codex_accepts() { "$CODEX" exec "$1" --help >/dev/null 2>&1; }
 
-ARGS=( exec -m "$MODEL" -c "model_reasoning_effort=\"$EFFORT\"" -s read-only --output-schema "$SCHEMA" -o "$OUT" )
+ARGS=( exec )
+[ -n "$MODEL" ] && ARGS+=( -m "$MODEL" )
+ARGS+=( -c "model_reasoning_effort=\"$EFFORT\"" -s read-only --output-schema "$SCHEMA" -o "$OUT" )
 if codex_accepts --ignore-user-config; then ARGS+=( --ignore-user-config ); fi
 if codex_accepts --ephemeral; then ARGS+=( --ephemeral ); fi
 
